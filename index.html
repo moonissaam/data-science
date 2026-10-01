@@ -297,6 +297,63 @@ def reset_ns():
 
 reset_ns()
 
+# ---------- 사이킷런 MinMaxScaler (브라우저용 가벼운 구현: 코랩의 sklearn과 같은 방식으로 씀) ----------
+import types as _types
+class NotFittedError(ValueError, AttributeError):
+    pass
+
+class MinMaxScaler:
+    def __init__(self, feature_range=(0, 1), copy=True, clip=False):
+        self.feature_range = feature_range
+        self.copy = copy
+        self.clip = clip
+    def __repr__(self):
+        return 'MinMaxScaler()'
+    def _arr(self, X):
+        if isinstance(X, pd.Series) or np.ndim(X) == 1:
+            raise ValueError('Expected 2D array, got 1D array instead. 열 하나만 넣을 때는 df[[열이름]]처럼 대괄호를 두 번 써요.')
+        a = np.asarray(X)
+        return a.astype(float)
+    def fit(self, X, y=None):
+        a = self._arr(X)
+        if isinstance(X, pd.DataFrame):
+            self.feature_names_in_ = np.asarray([str(c) for c in X.columns], dtype=object)
+        self.n_features_in_ = a.shape[1]
+        self.data_min_ = np.nanmin(a, axis=0)
+        self.data_max_ = np.nanmax(a, axis=0)
+        self.data_range_ = self.data_max_ - self.data_min_
+        lo, hi = self.feature_range
+        rng = np.where(self.data_range_ == 0, 1.0, self.data_range_)
+        self.scale_ = (hi - lo) / rng
+        self.min_ = lo - self.data_min_ * self.scale_
+        return self
+    def _check(self):
+        if not hasattr(self, 'scale_'):
+            raise NotFittedError("This MinMaxScaler instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator.")
+    def transform(self, X):
+        self._check()
+        out = self._arr(X) * self.scale_ + self.min_
+        if self.clip:
+            out = np.clip(out, self.feature_range[0], self.feature_range[1])
+        return out
+    def fit_transform(self, X, y=None):
+        return self.fit(X).transform(X)
+    def inverse_transform(self, X):
+        self._check()
+        return (np.asarray(X, dtype=float) - self.min_) / self.scale_
+
+_sk = _types.ModuleType('sklearn')
+_pre = _types.ModuleType('sklearn.preprocessing')
+_exc = _types.ModuleType('sklearn.exceptions')
+_pre.MinMaxScaler = MinMaxScaler
+_exc.NotFittedError = NotFittedError
+_sk.preprocessing = _pre
+_sk.exceptions = _exc
+_sk.__version__ = '1.4 (browser)'
+sys.modules['sklearn'] = _sk
+sys.modules['sklearn.preprocessing'] = _pre
+sys.modules['sklearn.exceptions'] = _exc
+
 def set_var(name, value):
     NS[name] = value
 
@@ -796,6 +853,37 @@ def c15(df, r, so, snap):
         return False, '칸마다 숫자가 보이도록 annot 옵션을 켜 주세요.'
     return True, '밝은 칸일수록 양의 상관관계, 어두운 칸일수록 음의 상관관계예요. 대각선은 자기 자신이라 항상 1이에요.'
 
+# ---------- 정규화 ----------
+def c_norm(df, r, so, snap):
+    if df is None:
+        return False, NO_DF
+    cols = NS.get('cols')
+    if not isinstance(cols, (list, tuple)) or not cols:
+        return False, 'cols 변수에 정규화할 열 이름 목록이 없어요. 처음 코드의 cols 줄을 지우지 않았는지 확인해 보세요.'
+    miss = [str(c) for c in cols if c not in df.columns]
+    if miss:
+        return False, '없는 열 이름이 있어요: ' + ', '.join(miss)
+    txt = [str(c) for c in cols if not pd.api.types.is_numeric_dtype(df[c])]
+    if txt:
+        return False, '글자 열은 정규화할 수 없어요: ' + ', '.join(txt) + '. cols에는 숫자 열만 넣어요.'
+    ds = NS.get('df_scaled')
+    if not isinstance(ds, pd.DataFrame):
+        return False, 'df_scaled 변수에 정규화한 데이터 프레임이 저장되지 않았어요.'
+    if [str(c) for c in ds.columns] != [str(c) for c in cols]:
+        return False, 'df_scaled의 열 이름이 cols와 달라요. pd.DataFrame(df_new, columns=cols)로 만들어 보세요.'
+    if len(ds) != len(df):
+        return False, 'df_scaled의 행 수가 df와 달라요.'
+    src = df[list(cols)].to_numpy(dtype=float)
+    lo, hi = np.nanmin(src, axis=0), np.nanmax(src, axis=0)
+    ref = (src - lo) / np.where(hi - lo == 0, 1.0, hi - lo)
+    got = ds.to_numpy(dtype=float)
+    if np.allclose(got, src, equal_nan=True):
+        return False, '값이 그대로예요. 정규화 도구로 바꾼 결과를 df_new에 다시 저장했는지 확인해 보세요.'
+    if not np.allclose(got, ref, atol=1e-9, equal_nan=True):
+        return False, '정규화한 값이 맞지 않아요. 각 열의 최솟값은 0, 최댓값은 1이 되어야 해요.'
+    shown = '' if isinstance(r, pd.DataFrame) else ' 마지막 줄에 df_scaled.head(3)을 쓰면 결과를 볼 수 있어요.'
+    return True, '숫자 열 ' + str(len(cols)) + '개가 모두 0~1 사이 값이 되었어요. 단위가 달라도 이제 크기를 비교할 수 있어요. 원본 df는 그대로라서 다음 단계부터 df를 계속 써요.' + shown
+
 def corr_options():
     d = _df()
     return json.dumps([str(c) for c in _cols(d)] if d is not None else [], ensure_ascii=False)
@@ -836,7 +924,7 @@ def check16(target, pos, pos_v, neg, neg_v):
     return json.dumps({'ok': ok, 'msg': msg}, ensure_ascii=False)
 
 CHECKS = {1: c1, 2: c2, 3: c3, 4: c4, 5: c5, 6: c6, 7: c7, 8: c8, 9: c9, 10: c10,
-          11: c11, 12: c12, 13: c13, 14: c14, 15: c15}
+          11: c11, 12: c_norm, 13: c12, 14: c13, 15: c14, 16: c15}
 
 def check(step):
     try:
@@ -924,7 +1012,8 @@ const STAGES = [
   { name: "불러오기·특성 파악", steps: [1, 2, 3, 4, 5] },
   { name: "결측치 처리", steps: [6, 7, 8] },
   { name: "이상치 처리", steps: [9, 10, 11] },
-  { name: "탐색적 데이터 분석", steps: [12, 13, 14, 15, 16] },
+  { name: "정규화", steps: [12] },
+  { name: "탐색적 데이터 분석", steps: [13, 14, 15, 16, 17] },
 ];
 const STEPS = [
   { id: 1, form: "빈칸형", title: "CSV 파일 불러오기",
@@ -991,29 +1080,35 @@ const STEPS = [
     answer: "df = df[df[col] <= upper]",
     hints: ["조건식 df[col] <= upper 는 행마다 True/False를 만들어요. 이걸 df[ ] 안에 넣으면 True인 행만 남아요.", "df = df[__________ <= upper]"] },
 
-  { id: 12, form: "한줄형", title: "히스토그램으로 분포 보기", plot: true,
+  { id: 12, form: "빈칸형", title: "최소-최대 정규화",
+    goal: "사이킷런의 최소-최대 정규화 도구로 숫자 열을 0~1 사이 값으로 바꿔 df_scaled에 저장하고, 앞 3행을 보여 주세요.",
+    starter: (c) => "# 최소-최대 정규화 도구 불러오기\nfrom sklearn.preprocessing import ____\n\n# 정규화할 수치형 속성 (내 데이터의 숫자 열이 들어 있어요)\ncols = " + c.colsPy + "\ndf_new = df[cols]\n\n# 최솟값은 0, 최댓값은 1이 되도록 정규화하기\ndf_new = ____().____(df_new)\n\n# 열 이름을 붙여 새 데이터 프레임 만들기\ndf_scaled = pd.DataFrame(df_new, columns=cols)\ndf_scaled.head(3)",
+    answer: (c) => "from sklearn.preprocessing import MinMaxScaler\n\ncols = " + c.colsPy + "\ndf_new = df[cols]\n\ndf_new = MinMaxScaler().fit_transform(df_new)\n\ndf_scaled = pd.DataFrame(df_new, columns=cols)\ndf_scaled.head(3)",
+    hints: ["최소(Min)-최대(Max)로 크기를 맞추는(Scaler) 도구를 불러와요. 최솟값·최댓값을 계산(fit)하고 바로 바꾸는(transform) 함수를 한 번에 써요.", "from sklearn.preprocessing import MinMax______\ndf_new = MinMax______().fit_________(df_new)"] },
+
+  { id: 13, form: "한줄형", title: "히스토그램으로 분포 보기", plot: true,
     goal: "고른 열의 분포를 히스토그램으로 그리세요.",
     picker: { kind: "num", var: "col", label: "분포를 볼 열" },
     starter: "# 고른 열(col)의 히스토그램 그리기\n\nplt.show()",
     answer: "plt.hist(df[col])\nplt.show()",
     hints: ["히스토그램은 영어로 histogram, 줄여서 hist예요.", "plt.hist(______)"] },
-  { id: 13, form: "빈칸형", title: "산점도로 두 속성의 관계 보기", plot: true,
+  { id: 14, form: "빈칸형", title: "산점도로 두 속성의 관계 보기", plot: true,
     goal: "가로축 x 열에 따라 세로축 y 열이 어떻게 변하는지 산점도로 그리고, 제목과 축 이름을 붙이세요.",
     picker: { kind: "xy" },
     starter: "# 가로축은 x, 세로축은 y 열이에요 (위에서 고른 열 이름이 들어 있어요)\nplt.____(df[x], df[y])\nplt.title(____)\nplt.xlabel(____)\nplt.ylabel(____)\nplt.grid()\nplt.show()",
     answer: "plt.scatter(df[x], df[y])\nplt.title(x + '에 따른 ' + y)\nplt.xlabel(x)\nplt.ylabel(y)\nplt.grid()\nplt.show()",
     hints: ["두 변수의 관계를 점으로 나타내는 그래프는 scatter예요. 제목은 글자라서 따옴표로 감싸요.", "plt.xlabel(x)  # 가로축 이름\nplt.ylabel(y)  # 세로축 이름"] },
-  { id: 14, form: "빈칸형", title: "상관계수 구하기",
+  { id: 15, form: "빈칸형", title: "상관계수 구하기",
     goal: "수치형 속성만으로 상관계수를 구해 df_corr에 저장하고, 소수 둘째 자리까지 보여 주세요.",
     starter: "# 수치형 데이터 속성만 사용하는 옵션을 넣어 상관계수 구하기\ndf_corr = df.____(____=True)\n\n# 소수 둘째 자리까지 반올림하여 보이기\ndf_corr.____(2)",
     answer: "df_corr = df.corr(numeric_only=True)\ndf_corr.round(2)",
     hints: ["상관관계는 영어로 correlation, 줄여서 corr예요. 수치형(numeric) 속성만(only) 쓰는 옵션을 넣고, 반올림은 round예요.", "df_corr = df.corr(numeric_____=True)\ndf_corr.r____(2)"] },
-  { id: 15, form: "빈칸형", title: "상관계수 시각화하기", plot: true,
+  { id: 16, form: "빈칸형", title: "상관계수 시각화하기", plot: true,
     goal: "seaborn으로 상관계수를 히트맵으로 그리고, 칸마다 값이 표시되게 하세요.",
     starter: "import seaborn as sns\n\n# 칸마다 값이 보이도록 히트맵 그리기\nsns.____(df_corr, ____=____)\nplt.show()",
     answer: "import seaborn as sns\n\nsns.heatmap(df_corr, annot=True)\nplt.show()",
     hints: ["상관계수를 색으로 보여 주는 그래프는 heatmap이에요. 칸마다 숫자를 적어 넣는(annotate) 옵션도 함께 넣어요.", "sns.heatmap(df_corr, a____=True)"] },
-  { id: 16, form: "서술형", title: "속성 간의 관계 분석", kind: "answer",
+  { id: 17, form: "서술형", title: "속성 간의 관계 분석", kind: "answer",
     goal: "상관계수 표를 보고 기준 열과 가장 강한 양의 상관관계, 가장 강한 음의 상관관계인 속성을 상관계수와 함께 쓰고, 두 속성의 관계를 해석하세요.",
     picker: { kind: "target", var: "target", label: "기준 열" },
     hints: ["상관계수 표에서 파랗게 칠해진 기준 열의 줄을 보세요. 자기 자신(1.00)은 빼요.", "양의 상관관계: 1에 가장 가까운 값 · 음의 상관관계: -1에 가장 가까운 값"] },
@@ -1029,7 +1124,10 @@ const S = {
 };
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const ctx = () => ({ enc: S.info && S.info.enc ? S.info.enc : "utf-8" });
+const ctx = () => ({
+  enc: S.info && S.info.enc ? S.info.enc : "utf-8",
+  colsPy: "[" + ((S.info && S.info.numeric) || []).map((c) => "'" + String(c).replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "'").join(", ") + "]",
+});
 const val = (v) => (typeof v === "function" ? v(ctx()) : v);
 function freshStep() { return { status: "locked", code: null, attempts: 0, hints: 0, form: {}, run: null, verdict: null, execNo: null }; }
 S.steps = STEPS.map(freshStep);
@@ -1285,7 +1383,7 @@ function pickerHTML(step, k) {
     let def;
     if (p.kind === "na") def = (opts.find((o) => o.count > 0) || opts[0]).name;
     else if (p.kind === "out") { const pos = opts.filter((o) => o.count > 0).sort((a, b) => a.count - b.count || b.ext - a.ext); def = (pos[0] || opts[0]).name; }
-    else if (p.kind === "target") def = S.pick[13] && names.includes(S.pick[13].y) ? S.pick[13].y : names[names.length - 1];
+    else if (p.kind === "target") def = S.pick[14] && names.includes(S.pick[14].y) ? S.pick[14].y : names[names.length - 1];
     else def = names[names.length - 1];
     mine[p.var] = def;
   }
@@ -1423,7 +1521,7 @@ function renderAnswer(step, st, ready) {
   const locked = !editable(S.view);
   const sel = (id, v) => `<select id="${id}" ${locked ? "disabled" : ""}><option value="">고르세요</option>${cols.map((c) => `<option value="${esc(c)}" ${c === v ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>`;
   card.innerHTML = `
-    <span class="label">14번에서 구한 상관계수 (df_corr, 소수 둘째 자리)</span>
+    <span class="label">15번에서 구한 상관계수 (df_corr, 소수 둘째 자리)</span>
     <div class="tablebox" id="corrBox">${py("corr_table")}</div>
     <span class="label">답 쓰기 · 기준 열: ${esc(target)}</span>
     <div class="answer">
@@ -1475,6 +1573,12 @@ function explain(e) {
     if (v) return `${v}는 변수라서 따옴표 없이 써요. 예: df[${v}]`;
     return `'${k}' 열이 없어요. 열 이름의 철자와 띄어쓰기를 데이터 미리보기와 비교해 보세요.`;
   }
+  if (t === "NotFittedError") return "정규화 도구가 아직 최솟값·최댓값을 모르고 있어요. 계산(fit)과 변환(transform)을 한 번에 하는 fit_transform을 써 보세요.";
+  if (t === "ImportError") {
+    const n = (m.match(/import name '(.+?)'/) || [])[1] || "";
+    if (/^_+$/.test(n)) return "빈칸(____)을 채워 주세요.";
+    return `'${n}'을(를) 불러올 수 없어요. 대소문자까지 철자를 확인해 보세요.`;
+  }
   if (t === "IndentationError") return "들여쓰기가 맞지 않아요. 줄 맨 앞의 공백을 지워 보세요.";
   if (t === "SyntaxError") return "문법 오류예요. 괄호와 따옴표가 짝이 맞는지, 쉼표가 빠지지 않았는지 확인해 보세요.";
   if (t === "UnicodeDecodeError") return /cp949|euc/i.test(m)
@@ -1482,7 +1586,6 @@ function explain(e) {
     : "한글이 들어 있는 파일을 읽지 못했어요. 인코딩 방식을 바꿔 보세요. 예: encoding='cp949'";
   if (t === "ModuleNotFoundError") {
     if (/google/.test(m)) return "코랩 전용 코드예요. 여기서는 파일이 이미 올라가 있으니 이 줄은 지워도 돼요.";
-    if (/sklearn/.test(m)) return "이 복습에서는 사이킷런을 쓰지 않아요.";
     return "그 라이브러리를 찾지 못했어요. 이름 철자를 확인하거나, 그래프 도구가 준비될 때까지 기다려 주세요.";
   }
   if (/unexpected keyword argument/.test(m)) {
@@ -1496,6 +1599,7 @@ function explain(e) {
     return `'${a}'라는 기능이 없어요. 이름 철자를 확인해 보세요.`;
   }
   if (t === "TypeError" && /not callable/.test(m)) return "괄호를 붙일 수 없는 속성이에요. 뒤의 ()를 빼 보세요.";
+  if (t === "ValueError" && /DataFrame constructor not properly called/.test(m)) return "pd.DataFrame( ) 안에 표로 만들 수 있는 값이 들어가지 않았어요. 정규화 줄에서 fit만 쓰지 않았는지 확인해 보세요. 계산과 변환을 한 번에 하려면 fit_transform을 써요.";
   if (t === "ValueError" && /could not convert string to float/.test(m)) return "글자 열이 섞여 있어 계산할 수 없어요. 숫자 열만 쓰도록 numeric_only=True를 넣어 보세요.";
   if (t === "FileNotFoundError") return "그런 파일이 없어요. 올린 파일은 'data.csv'라는 이름으로 저장되어 있어요.";
   if (t === "TypeError") return "값의 종류가 맞지 않아요. 함수에 넣은 값이나 괄호 위치를 확인해 보세요.";
@@ -1581,7 +1685,7 @@ function renderDone() {
   $("stepCard").innerHTML = `
     <span class="label">다음 수업 전에</span>
     <p class="goal"><span class="qtag">[안내]</span>위쪽 체크 동그라미를 누르면 각 단계에서 한 것을 다시 볼 수 있어요. 코랩 노트북을 받아 그대로 실행해 보세요.</p>`;
-  const f = S.steps[15].form;
+  const f = S.steps[16].form;
   $("doneView").innerHTML = `
     <div class="card done">
       <h2>데이터 분석 복습을 마쳤어요</h2>
