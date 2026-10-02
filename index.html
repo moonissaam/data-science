@@ -57,27 +57,28 @@ code, pre, .mono { font-family: var(--font-mono); }
 
 /* 상단 */
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
-.top-inner { max-width: 1320px; margin: 0 auto; padding: 10px 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; }
+.top-inner { max-width: 1320px; margin: 0 auto; padding: 10px 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
 .brand { display: flex; align-items: center; gap: 12px; }
 .mark { font-weight: 600; font-size: 14px; background: var(--ink); color: var(--surface); border-radius: 6px; padding: 4px 8px; letter-spacing: .02em; }
 .eyebrow { font-size: 12px; letter-spacing: .05em; color: var(--muted); display: block; }
 .pytag { display: inline-block; vertical-align: 2px; margin-left: 6px; font: 600 12.5px var(--font-body); color: var(--blue); background: var(--blue-soft); border: 1px solid var(--blue); border-radius: 999px; padding: 1px 10px; white-space: nowrap; }
 .brand h1 { font-size: 18px; font-weight: 600; line-height: 1.3; white-space: nowrap; }
-.dfchip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; background: var(--code-bg); font-size: 13px; white-space: nowrap; }
+.dfchip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; background: var(--code-bg); font-size: 12.5px; white-space: nowrap; }
 .dfchip b { font: 600 14px var(--font-mono); color: var(--blue); }
 .dfchip .shape { color: var(--muted); font-variant-numeric: tabular-nums; }
-.rail { display: flex; flex-wrap: nowrap; gap: 14px; flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: thin; padding: 6px; margin: -6px 0; }
+.rail { display: flex; flex-wrap: nowrap; gap: 10px; flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: thin; padding: 6px; margin: -6px 0; }
 .stage { display: flex; flex-direction: column; gap: 3px; flex: none; }
 .stage-name { font-size: 11.5px; color: var(--muted); letter-spacing: .02em; white-space: nowrap; }
 .stage.on .stage-name { color: var(--ink); font-weight: 500; }
 .stage-steps { display: flex; gap: 3px; }
-.pip { font: 500 11.5px var(--font-mono); width: 24px; height: 24px; padding: 0; border-radius: 50%; flex: none; display: grid; place-items: center; border: 1px solid var(--line); background: var(--code-bg); color: var(--muted); font-variant-numeric: tabular-nums; }
+.pip { font: 500 11px var(--font-mono); width: 22px; height: 22px; padding: 0; border-radius: 50%; flex: none; display: grid; place-items: center; border: 1px solid var(--line); background: var(--code-bg); color: var(--muted); font-variant-numeric: tabular-nums; }
 .pip:disabled { opacity: 1; cursor: default; }
 .pip.current { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .pip.passed { background: var(--pass); color: var(--surface); border-color: var(--pass); }
 .pip.skipped { background: var(--fail-soft); color: var(--fail); border-color: var(--fail); }
 .pip:not(:disabled):hover { transform: translateY(-1px); }
 .pip.viewing { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--blue); }
+#homeBtn { padding: 6px 12px; font-size: 13.5px; white-space: nowrap; }
 .pystat { display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; color: var(--muted); }
 .pystat span { display: inline-flex; align-items: center; gap: 7px; }
 .pystat i { width: 8px; height: 8px; border-radius: 50%; background: var(--pending); display: inline-block; }
@@ -188,6 +189,24 @@ table.df tr.hl th, table.df tr.hl td { background: var(--blue-soft); color: var(
 .modal-box p { margin: 0; color: var(--muted); }
 .btn.danger { background: var(--fail); color: var(--surface); border-color: var(--fail); font-weight: 500; }
 
+/* 축하 팝업 */
+.cheer-box { max-width: 460px; text-align: center; align-items: center; padding: 30px 26px 24px; gap: 14px; border-top: 6px solid var(--blue); }
+.cheer-badge { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; background: var(--blue-soft); color: var(--blue); }
+.cheer-name { font-size: 18px; font-weight: 600; color: var(--ink); margin-bottom: -8px; }
+.namefield { display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; color: var(--muted); }
+.namefield input { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 17px; background: var(--surface); color: var(--ink); }
+.namefield input:focus { outline: 2px solid var(--blue); outline-offset: 1px; border-color: var(--blue); }
+.name-err { color: var(--fail); font-size: 13px; margin-top: -6px; }
+.cheer-box h2 { font-size: 26px; line-height: 1.35; color: var(--blue); letter-spacing: -.01em; }
+.cheer-box p { margin: 0; color: var(--ink); font-size: 15px; }
+.cheer-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; font-size: 13.5px; color: var(--muted); }
+.cheer-stats b { font: 700 16px var(--font-mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+#confetti { position: fixed; inset: 0; z-index: 30; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .modal:not([hidden]) .cheer-box { animation: pop .45s cubic-bezier(.2, 1.4, .4, 1); }
+  @keyframes pop { from { transform: scale(.7); opacity: 0; } to { transform: none; opacity: 1; } }
+}
+
 /* 완료 */
 .done h2 { font-size: 22px; }
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
@@ -253,6 +272,33 @@ code, pre, .mono, #code, .gutter, table.df, .pip, .dfchip b, .answer input {
   </section>
 </main>
 
+<div class="modal" id="nameModal" hidden role="dialog" aria-modal="true" aria-labelledby="nameTitle">
+  <form class="modal-box" id="nameForm" novalidate>
+    <h2 id="nameTitle">18단계를 모두 풀었어요!</h2>
+    <p>복습을 마치기 전에 이름을 써 주세요. 결과 화면과 코랩 노트북에 함께 적혀요.</p>
+    <label class="namefield" for="nameInput">이름
+      <input id="nameInput" type="text" maxlength="20" autocomplete="off" placeholder="예: 홍길동">
+    </label>
+    <span class="name-err" id="nameErr" hidden>이름을 써 주세요.</span>
+    <div class="row" style="justify-content:flex-end">
+      <button type="button" class="btn" id="nameCancel">취소</button>
+      <button type="submit" class="btn blue" id="nameOk">복습 마치기</button>
+    </div>
+  </form>
+</div>
+<div class="modal" id="cheerModal" hidden role="dialog" aria-modal="true" aria-labelledby="cheerTitle">
+  <div class="modal-box cheer-box">
+    <div class="cheer-badge" aria-hidden="true">
+      <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>
+    </div>
+    <div class="cheer-name" id="cheerName"></div>
+    <h2 id="cheerTitle">당신은 대단한 데이터 분석가~!!</h2>
+    <p>데이터 불러오기부터 탐색적 데이터 분석까지<br>18단계를 모두 마쳤어요.</p>
+    <div class="cheer-stats" id="cheerStats"></div>
+    <button class="btn blue" id="cheerOk">결과 보기</button>
+  </div>
+</div>
+<canvas id="confetti" hidden></canvas>
 <div class="modal" id="homeModal" hidden role="dialog" aria-modal="true" aria-labelledby="homeTitle">
   <div class="modal-box">
     <h2 id="homeTitle">처음 화면으로 돌아갈까요?</h2>
@@ -818,7 +864,7 @@ def c13(df, r, so, snap):
         return False, '축 이름이 서로 바뀌었어요. xlabel은 가로축, ylabel은 세로축 이름이에요.'
     rc = float(df[[x, y]].corr().iloc[0, 1])
     trend = '오른쪽 위로 올라가는' if rc > 0.3 else ('오른쪽 아래로 내려가는' if rc < -0.3 else '뚜렷한 방향이 없는')
-    return True, '점들이 대체로 ' + trend + ' 모양이에요. 다음 단계에서 상관계수로 확인해요.'
+    return True, '점들이 대체로 ' + trend + ' 모양이에요. 탐색적 데이터 분석 단계에서 상관계수로 확인해요.'
 
 def c14(df, r, so, snap):
     if df is None:
@@ -884,6 +930,30 @@ def c_norm(df, r, so, snap):
     shown = '' if isinstance(r, pd.DataFrame) else ' 마지막 줄에 df_scaled.head(3)을 쓰면 결과를 볼 수 있어요.'
     return True, '숫자 열 ' + str(len(cols)) + '개가 모두 0~1 사이 값이 되었어요. 단위가 달라도 이제 크기를 비교할 수 있어요. 원본 df는 그대로라서 다음 단계부터 df를 계속 써요.' + shown
 
+# ---------- 탐색적 데이터 분석: 산점도 행렬 ----------
+def c_pair(df, r, so, snap):
+    if df is None:
+        return False, NO_DF
+    pp = [p for p in PLOTLOG if p['kind'] == 'pairplot']
+    if not pp:
+        if PLOTLOG:
+            return False, '다른 종류의 그래프가 그려졌어요. 모든 수치형 속성 간의 관계를 한 번에 보여 주는 seaborn 함수를 써 보세요.'
+        return False, '산점도 행렬이 그려지지 않았어요. 힌트를 열어 보세요.'
+    p = pp[-1]
+    if p.get('n') is not None and p['n'] != len(df):
+        return False, '데이터 프레임 df 전체를 넣어 주세요.'
+    cols = _cols(df)
+    msg = '대각선 칸은 각 속성의 분포(히스토그램), 나머지 칸은 두 속성의 산점도예요.'
+    if len(cols) >= 2:
+        cm = df[cols].corr().abs()
+        for c in cols:
+            cm.loc[c, c] = np.nan
+        st = cm.stack()
+        if len(st):
+            a, b = st.idxmax()
+            msg += " 점들이 한 방향으로 가장 뚜렷하게 모인 쌍은 '" + str(a) + "'과(와) '" + str(b) + "'이에요."
+    return True, msg + ' 다음 단계에서 상관계수로 확인해요.'
+
 def corr_options():
     d = _df()
     return json.dumps([str(c) for c in _cols(d)] if d is not None else [], ensure_ascii=False)
@@ -924,7 +994,7 @@ def check16(target, pos, pos_v, neg, neg_v):
     return json.dumps({'ok': ok, 'msg': msg}, ensure_ascii=False)
 
 CHECKS = {1: c1, 2: c2, 3: c3, 4: c4, 5: c5, 6: c6, 7: c7, 8: c8, 9: c9, 10: c10,
-          11: c11, 12: c_norm, 13: c12, 14: c13, 15: c14, 16: c15}
+          11: c11, 12: c_norm, 13: c12, 14: c13, 15: c_pair, 16: c14, 17: c15}
 
 def check(step):
     try:
@@ -964,7 +1034,9 @@ def _summ(v):
     except Exception:
         return None
 
+import functools as _functools
 def _wrap(name, fn):
+    @_functools.wraps(fn)   # seaborn은 함수 이름(scatter, hist)을 보고 색을 정하므로 이름을 그대로 유지
     def w(self, *args, **kw):
         rec = {'kind': name}
         if name == 'scatter':
@@ -985,6 +1057,7 @@ plt.show = _show
 try:
     import seaborn as _sns
     _orig_heatmap = _sns.heatmap
+    @_functools.wraps(_orig_heatmap)
     def _heatmap(*args, **kw):
         data = args[0] if args else kw.get('data')
         rec = {'kind': 'heatmap', 'annot': False}
@@ -999,6 +1072,18 @@ try:
         PLOTLOG.append(rec)
         return _orig_heatmap(*args, **kw)
     _sns.heatmap = _heatmap
+    _orig_pair = _sns.pairplot
+    @_functools.wraps(_orig_pair)
+    def _pairplot(*args, **kw):
+        data = args[0] if args else kw.get('data')
+        rec = {'kind': 'pairplot'}
+        try:
+            rec['n'] = int(len(data))
+        except Exception:
+            rec['n'] = None
+        PLOTLOG.append(rec)
+        return _orig_pair(*args, **kw)
+    _sns.pairplot = _pairplot
     PLOT['sns'] = True
 except Exception:
     PLOT['sns'] = False
@@ -1013,7 +1098,8 @@ const STAGES = [
   { name: "결측치 처리", steps: [6, 7, 8] },
   { name: "이상치 처리", steps: [9, 10, 11] },
   { name: "정규화", steps: [12] },
-  { name: "탐색적 데이터 분석", steps: [13, 14, 15, 16, 17] },
+  { name: "데이터 시각화", steps: [13, 14] },
+  { name: "탐색적 데이터 분석", steps: [15, 16, 17, 18] },
 ];
 const STEPS = [
   { id: 1, form: "빈칸형", title: "CSV 파일 불러오기",
@@ -1098,17 +1184,22 @@ const STEPS = [
     starter: "# 가로축은 x, 세로축은 y 열이에요 (위에서 고른 열 이름이 들어 있어요)\nplt.____(df[x], df[y])\nplt.title(____)\nplt.xlabel(____)\nplt.ylabel(____)\nplt.grid()\nplt.show()",
     answer: "plt.scatter(df[x], df[y])\nplt.title(x + '에 따른 ' + y)\nplt.xlabel(x)\nplt.ylabel(y)\nplt.grid()\nplt.show()",
     hints: ["두 변수의 관계를 점으로 나타내는 그래프는 scatter예요. 제목은 글자라서 따옴표로 감싸요.", "plt.xlabel(x)  # 가로축 이름\nplt.ylabel(y)  # 세로축 이름"] },
-  { id: 15, form: "빈칸형", title: "상관계수 구하기",
+  { id: 15, form: "빈칸형", title: "산점도 행렬로 관계 한눈에 보기", plot: true,
+    goal: "seaborn으로 df의 모든 수치형 속성 사이의 관계를 산점도 행렬로 한 번에 그리세요.",
+    starter: "import seaborn as sns\n\n# 데이터 프레임 내 모든 수치형 속성 간의 관계를 한눈에 출력하기\nsns.____(df)\nplt.show()",
+    answer: "import seaborn as sns\n\nsns.pairplot(df)\nplt.show()",
+    hints: ["두 속성씩 짝(pair)을 지어 모두 그려 주는(plot) 함수예요.", "sns.p_______(df)"] },
+  { id: 16, form: "빈칸형", title: "상관계수 구하기",
     goal: "수치형 속성만으로 상관계수를 구해 df_corr에 저장하고, 소수 둘째 자리까지 보여 주세요.",
     starter: "# 수치형 데이터 속성만 사용하는 옵션을 넣어 상관계수 구하기\ndf_corr = df.____(____=True)\n\n# 소수 둘째 자리까지 반올림하여 보이기\ndf_corr.____(2)",
     answer: "df_corr = df.corr(numeric_only=True)\ndf_corr.round(2)",
     hints: ["상관관계는 영어로 correlation, 줄여서 corr예요. 수치형(numeric) 속성만(only) 쓰는 옵션을 넣고, 반올림은 round예요.", "df_corr = df.corr(numeric_____=True)\ndf_corr.r____(2)"] },
-  { id: 16, form: "빈칸형", title: "상관계수 시각화하기", plot: true,
+  { id: 17, form: "빈칸형", title: "상관계수 시각화하기", plot: true,
     goal: "seaborn으로 상관계수를 히트맵으로 그리고, 칸마다 값이 표시되게 하세요.",
     starter: "import seaborn as sns\n\n# 칸마다 값이 보이도록 히트맵 그리기\nsns.____(df_corr, ____=____)\nplt.show()",
     answer: "import seaborn as sns\n\nsns.heatmap(df_corr, annot=True)\nplt.show()",
     hints: ["상관계수를 색으로 보여 주는 그래프는 heatmap이에요. 칸마다 숫자를 적어 넣는(annotate) 옵션도 함께 넣어요.", "sns.heatmap(df_corr, a____=True)"] },
-  { id: 17, form: "서술형", title: "속성 간의 관계 분석", kind: "answer",
+  { id: 18, form: "서술형", title: "속성 간의 관계 분석", kind: "answer",
     goal: "상관계수 표를 보고 기준 열과 가장 강한 양의 상관관계, 가장 강한 음의 상관관계인 속성을 상관계수와 함께 쓰고, 두 속성의 관계를 해석하세요.",
     picker: { kind: "target", var: "target", label: "기준 열" },
     hints: ["상관계수 표에서 파랗게 칠해진 기준 열의 줄을 보세요. 자기 자신(1.00)은 빼요.", "양의 상관관계: 1에 가장 가까운 값 · 음의 상관관계: -1에 가장 가까운 값"] },
@@ -1251,7 +1342,7 @@ function resetProgress() {
 }
 function hasProgress() { return S.steps.some((s) => s.attempts > 0 || s.status === "passed" || s.status === "skipped"); }
 function clearData() {
-  S.dataBytes = null; S.info = null; S.dataReady = false; S.confirmSwap = false; S.dataNote = null;
+  S.dataBytes = null; S.info = null; S.dataReady = false; S.confirmSwap = false; S.dataNote = null; S.name = "";
   if (S.pyReady) py("reset_ns");
   resetProgress(); render();
 }
@@ -1521,7 +1612,7 @@ function renderAnswer(step, st, ready) {
   const locked = !editable(S.view);
   const sel = (id, v) => `<select id="${id}" ${locked ? "disabled" : ""}><option value="">고르세요</option>${cols.map((c) => `<option value="${esc(c)}" ${c === v ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>`;
   card.innerHTML = `
-    <span class="label">15번에서 구한 상관계수 (df_corr, 소수 둘째 자리)</span>
+    <span class="label">16번에서 구한 상관계수 (df_corr, 소수 둘째 자리)</span>
     <div class="tablebox" id="corrBox">${py("corr_table")}</div>
     <span class="label">답 쓰기 · 기준 열: ${esc(target)}</span>
     <div class="answer">
@@ -1663,8 +1754,56 @@ function doReopen(k) {
   render();
   $("code").focus();
 }
+function openCheer() {
+  const passed = S.steps.filter((s) => s.status === "passed").length;
+  const hints = S.steps.reduce((a, s) => a + s.hints, 0);
+  $("cheerName").textContent = S.name ? `${S.name} 님,` : "";
+  $("cheerStats").innerHTML = `<span>직접 통과 <b>${passed}</b> / ${STEPS.length}단계</span><span>열어 본 힌트 <b>${hints}</b>번</span>`;
+  $("cheerModal").hidden = false;
+  $("cheerOk").focus();
+  confetti();
+}
+function closeCheer() { $("cheerModal").hidden = true; }
+function confetti() {
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cv = $("confetti"), g = cv.getContext("2d");
+  cv.hidden = false;
+  const W = cv.width = innerWidth, H = cv.height = innerHeight;
+  const colors = ["#1D5BD6", "#22704A", "#D9B84A", "#1B6A87", "#E99A70", "#7FA8F7"];
+  const bits = Array.from({ length: 160 }, () => ({
+    x: Math.random() * W, y: -20 - Math.random() * H * 0.6, w: 6 + Math.random() * 6, h: 8 + Math.random() * 8,
+    vx: (Math.random() - 0.5) * 2.4, vy: 2.5 + Math.random() * 3.5, r: Math.random() * 6.3, vr: (Math.random() - 0.5) * 0.3,
+    c: colors[Math.floor(Math.random() * colors.length)],
+  }));
+  const start = performance.now();
+  (function frame(now) {
+    const t = now - start;
+    g.clearRect(0, 0, W, H);
+    g.globalAlpha = t > 2600 ? Math.max(0, 1 - (t - 2600) / 900) : 1;
+    for (const b of bits) {
+      b.x += b.vx; b.y += b.vy; b.r += b.vr; b.vy += 0.03;
+      g.save(); g.translate(b.x, b.y); g.rotate(b.r); g.fillStyle = b.c; g.fillRect(-b.w / 2, -b.h / 2, b.w, b.h); g.restore();
+    }
+    if (t < 3500) requestAnimationFrame(frame); else { g.clearRect(0, 0, W, H); cv.hidden = true; }
+  })(start);
+}
+function askName() {
+  $("nameInput").value = S.name || "";
+  $("nameErr").hidden = true;
+  $("nameModal").hidden = false;
+  $("nameInput").focus();
+}
+function finishWithName(e) {
+  if (e) e.preventDefault();
+  const name = $("nameInput").value.trim();
+  if (!name) { $("nameErr").hidden = false; $("nameInput").focus(); return; }
+  S.name = name;
+  $("nameModal").hidden = true;
+  S.done = true; S.view = "done"; render(); window.scrollTo({ top: 0, behavior: "smooth" });
+  openCheer();
+}
 function goNext() {
-  if (S.cur === STEPS.length - 1) { S.done = true; S.view = "done"; render(); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
+  if (S.cur === STEPS.length - 1) { askName(); return; }
   S.cur++;
   S.view = S.cur;
   S.steps[S.cur].status = "current";
@@ -1685,10 +1824,10 @@ function renderDone() {
   $("stepCard").innerHTML = `
     <span class="label">다음 수업 전에</span>
     <p class="goal"><span class="qtag">[안내]</span>위쪽 체크 동그라미를 누르면 각 단계에서 한 것을 다시 볼 수 있어요. 코랩 노트북을 받아 그대로 실행해 보세요.</p>`;
-  const f = S.steps[16].form;
+  const f = S.steps[17].form;
   $("doneView").innerHTML = `
     <div class="card done">
-      <h2>데이터 분석 복습을 마쳤어요</h2>
+      <h2>${esc(S.name ? S.name + " 님, " : "")}데이터 분석 복습을 마쳤어요</h2>
       <div class="stats">
         <div class="stat"><b>${passed}</b><span class="small muted">직접 통과한 단계</span></div>
         <div class="stat"><b>${skipped}</b><span class="small muted">정답으로 넘어간 단계</span></div>
@@ -1707,7 +1846,7 @@ function renderDone() {
         ? `<div><strong class="small">${step.id}. ${esc(step.title)}</strong><pre>${esc(S.steps[k].status === "passed" ? `양의 상관: ${f.pos} (${f.posV})\n음의 상관: ${f.neg} (${f.negV})\n해석: ${f.text}` : "정답으로 넘어감")}</pre></div>`
         : `<div><strong class="small">${step.id}. ${esc(step.title)}</strong>${S.steps[k].status === "skipped" ? ` <span class="chip">정답으로 넘어감</span>` : ""}<pre>${esc(codeFor(k))}</pre></div>`).join("")}
     </div>`;
-  $("nbBtn").onclick = () => download("데이터분석_복습.ipynb", JSON.stringify(buildNotebook(), null, 1), "application/json");
+  $("nbBtn").onclick = () => download(`데이터분석_복습${S.name ? "_" + S.name.replace(/[\\/:*?"<>|\s]+/g, "") : ""}.ipynb`, JSON.stringify(buildNotebook(), null, 1), "application/json");
   $("againBtn").onclick = openHome;
   $("csvBtn").onclick = () => download("정리한_데이터.csv", "﻿" + py("export_csv"), "text/csv");
 }
@@ -1716,7 +1855,7 @@ function buildNotebook() {
   const md = (text) => ({ cell_type: "markdown", metadata: {}, source: lines(text) });
   const code = (text) => ({ cell_type: "code", metadata: {}, execution_count: null, outputs: [], source: lines(text) });
   const cells = [
-    md(`# 데이터 분석 복습하기\n\n데이터: ${S.dataName}\n\n첫 칸을 실행해 이 데이터를 **data.csv**라는 이름으로 올린 뒤, 위에서부터 차례로 실행하세요.`),
+    md(`# 데이터 분석 복습하기\n\n이름: ${S.name || ""}\n\n데이터: ${S.dataName}\n\n첫 칸을 실행해 이 데이터를 **data.csv**라는 이름으로 올린 뒤, 위에서부터 차례로 실행하세요.`),
     code("from google.colab import files\nuploaded = files.upload()"),
   ];
   STEPS.forEach((step, k) => {
@@ -1760,6 +1899,14 @@ codeEl.addEventListener("keydown", (e) => {
 });
 $("runBtn").onclick = runCurrent;
 $("homeBtn").onclick = openHome;
+$("nameForm").onsubmit = finishWithName;
+$("nameInput").oninput = () => { $("nameErr").hidden = true; };
+$("nameCancel").onclick = () => { $("nameModal").hidden = true; };
+$("nameModal").onclick = (e) => { if (e.target.id === "nameModal") $("nameModal").hidden = true; };
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("nameModal").hidden) $("nameModal").hidden = true; });
+$("cheerOk").onclick = closeCheer;
+$("cheerModal").onclick = (e) => { if (e.target.id === "cheerModal") closeCheer(); };
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("cheerModal").hidden) closeCheer(); });
 $("homeCancel").onclick = closeHome;
 $("homeOk").onclick = () => { closeHome(); clearData(); window.scrollTo({ top: 0, behavior: "smooth" }); };
 $("homeModal").onclick = (e) => { if (e.target.id === "homeModal") closeHome(); };
